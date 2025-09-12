@@ -674,7 +674,7 @@ export function SellerDisclosureForm({ onNext, onExit, initialData }: SellerDisc
           </div>
         );
 
-      case 12:
+      case 13:
         return (
           <div className="space-y-6">
             <div className="space-y-4">
