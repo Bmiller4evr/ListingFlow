@@ -14,6 +14,7 @@ import { Offers } from "./Offers";
 import { FindNextHome } from "./tools/FindNextHome";
 
 import { LandingPage } from "./LandingPage";
+import { TestAuth } from "./TestAuth";
 
 
 import { OnboardingFlow, PropertyListingData } from "./onboarding/OnboardingFlow";
@@ -143,6 +144,9 @@ export function AppContent({
         />
       )}
 
+      {currentView === 'test-auth' && (
+        <TestAuth />
+      )}
 
       
       {currentView === 'onboarding' && (

@@ -1,4 +1,4 @@
-export type View = 'landing' | 'listings' | 'listing-detail' | 'documents' | 'showings' | 'todo' | 'offers' | 'account' | 'messages' | 'repairs' | 'onboarding' | 'listing-creation' | 'find-home';
+export type View = 'landing' | 'listings' | 'listing-detail' | 'documents' | 'showings' | 'todo' | 'offers' | 'account' | 'messages' | 'repairs' | 'onboarding' | 'listing-creation' | 'find-home' | 'test-auth';
 
 export type OnboardingStep = 'sso-selection' | 'account-confirmation' | 'complete';
 
