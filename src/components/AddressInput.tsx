@@ -12,7 +12,7 @@ interface AddressInputProps {
 
 export function AddressInput({ 
   onAddressSelected, 
-  placeholder = "Enter Your Address",
+  placeholder = "Enter your address",
   className 
 }: AddressInputProps) {
   const [address, setAddress] = useState("");
@@ -27,14 +27,14 @@ export function AddressInput({
   // Load Google Maps API if not already loaded
   useEffect(() => {
     const initializeGoogleMaps = () => {
-      // For demo purposes, skip Google Maps API loading and use fallback behavior
-      setHasError(true);
-      setIsLoading(false);
-      // Google Maps API is intentionally disabled in demo environment
-      return;
-
-      // The original code below would be used in production with a valid API key
-      /*
+      // Check if we have an API key
+      const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+      if (!apiKey) {
+        console.warn('VITE_GOOGLE_MAPS_API_KEY not found. Using fallback behavior.');
+        setHasError(true);
+        setIsLoading(false);
+        return;
+      }
       if (window.google && window.google.maps && window.google.maps.places) {
         setIsLoaded(true);
         setIsLoading(false);
@@ -71,8 +71,7 @@ export function AddressInput({
 
       // Load Google Maps script
       const script = document.createElement('script');
-      // In production, replace YOUR_GOOGLE_MAPS_API_KEY with your actual API key
-      script.src = `https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY_HERE&libraries=places&loading=async`;
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&loading=async`;
       script.async = true;
       script.defer = true;
       script.onload = () => {
@@ -121,7 +120,6 @@ export function AddressInput({
       }, 10000); // 10 second timeout
       
       document.head.appendChild(script);
-      */
     };
 
     initializeGoogleMaps();
@@ -233,7 +231,7 @@ export function AddressInput({
         <Input
           ref={inputRef}
           type="text"
-          placeholder={hasError ? "Enter your full address (e.g., 123 Main St, City, State)" : (isLoading ? "Loading address suggestions..." : placeholder)}
+          placeholder={hasError ? "Enter your address (e.g., 123 Main St, City, State)" : (isLoading ? "Loading address suggestions..." : placeholder)}
           value={address}
           onChange={handleInputChange}
           onKeyPress={handleKeyPress}
@@ -251,7 +249,10 @@ export function AddressInput({
       {hasError && (
         <p className="text-xs text-muted-foreground mt-2">
           <span className="text-amber-600 dark:text-amber-400">
-            Address autocomplete temporarily unavailable. You can still enter your address manually.
+            {!import.meta.env.VITE_GOOGLE_MAPS_API_KEY 
+              ? "Google Maps API key not configured. You can still enter your address manually."
+              : "Address autocomplete temporarily unavailable. You can still enter your address manually."
+            }
           </span>
         </p>
       )}
