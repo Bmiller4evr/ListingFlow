@@ -30,7 +30,7 @@ export function Sidebar({ collapsed, onMenuClick, activeView, onToggleCollapse, 
     }`;
     
     if (isActive) {
-      return `${baseClass} bg-brand-primary text-white border-0`;
+      return `${baseClass} bg-brand-primary text-white hover:bg-brand-primary hover:text-white border-0`;
     }
     return `${baseClass} hover:bg-accent hover:text-accent-foreground text-text-secondary`;
   };
@@ -84,7 +84,7 @@ export function Sidebar({ collapsed, onMenuClick, activeView, onToggleCollapse, 
             onClick={() => handleClick('listings')}
             title={collapsed ? 'My Listings' : undefined}
           >
-            <Building className={`h-5 w-5 ${(!collapsed || isMobile) ? 'mr-2' : ''} ${activeView === 'listings' ? 'text-sidebar-primary' : ''}`} />
+            <Building className={`h-5 w-5 ${(!collapsed || isMobile) ? 'mr-2' : ''}`} />
             {(!collapsed || isMobile) && <span>My Listings</span>}
             {collapsed && !isMobile && activeView === 'listings' && (
               <div className="absolute left-0 w-1 h-6 bg-sidebar-primary rounded-r-full" />
@@ -97,7 +97,7 @@ export function Sidebar({ collapsed, onMenuClick, activeView, onToggleCollapse, 
             onClick={() => handleClick('showings')}
             title={collapsed ? 'Showings' : undefined}
           >
-            <Eye className={`h-5 w-5 ${(!collapsed || isMobile) ? 'mr-2' : ''} ${activeView === 'showings' ? 'text-sidebar-primary' : ''}`} />
+            <Eye className={`h-5 w-5 ${(!collapsed || isMobile) ? 'mr-2' : ''}`} />
             {(!collapsed || isMobile) && <span>Showings</span>}
             {collapsed && !isMobile && activeView === 'showings' && (
               <div className="absolute left-0 w-1 h-6 bg-sidebar-primary rounded-r-full" />
@@ -110,7 +110,7 @@ export function Sidebar({ collapsed, onMenuClick, activeView, onToggleCollapse, 
             onClick={() => handleClick('offers')}
             title={collapsed ? 'Offers' : undefined}
           >
-            <HandHeart className={`h-5 w-5 ${(!collapsed || isMobile) ? 'mr-2' : ''} ${activeView === 'offers' ? 'text-sidebar-primary' : ''}`} />
+            <HandHeart className={`h-5 w-5 ${(!collapsed || isMobile) ? 'mr-2' : ''}`} />
             {(!collapsed || isMobile) && <span>Offers</span>}
             {collapsed && !isMobile && activeView === 'offers' && (
               <div className="absolute left-0 w-1 h-6 bg-sidebar-primary rounded-r-full" />
@@ -123,7 +123,7 @@ export function Sidebar({ collapsed, onMenuClick, activeView, onToggleCollapse, 
             onClick={() => handleClick('documents')}
             title={collapsed ? 'Documents' : undefined}
           >
-            <FileText className={`h-5 w-5 ${(!collapsed || isMobile) ? 'mr-2' : ''} ${activeView === 'documents' ? 'text-sidebar-primary' : ''}`} />
+            <FileText className={`h-5 w-5 ${(!collapsed || isMobile) ? 'mr-2' : ''}`} />
             {(!collapsed || isMobile) && <span>Documents</span>}
             {collapsed && !isMobile && activeView === 'documents' && (
               <div className="absolute left-0 w-1 h-6 bg-sidebar-primary rounded-r-full" />
@@ -136,7 +136,7 @@ export function Sidebar({ collapsed, onMenuClick, activeView, onToggleCollapse, 
             onClick={() => handleClick('todo')}
             title={collapsed ? 'To Do List' : undefined}
           >
-            <CheckSquare className={`h-5 w-5 ${(!collapsed || isMobile) ? 'mr-2' : ''} ${activeView === 'todo' ? 'text-sidebar-primary' : ''}`} />
+            <CheckSquare className={`h-5 w-5 ${(!collapsed || isMobile) ? 'mr-2' : ''}`} />
             {(!collapsed || isMobile) && <span>To Do List</span>}
             {collapsed && !isMobile && activeView === 'todo' && (
               <div className="absolute left-0 w-1 h-6 bg-sidebar-primary rounded-r-full" />
@@ -149,7 +149,7 @@ export function Sidebar({ collapsed, onMenuClick, activeView, onToggleCollapse, 
             onClick={() => handleClick('messages')}
             title={collapsed ? 'Messages' : undefined}
           >
-            <MessageSquare className={`h-5 w-5 ${(!collapsed || isMobile) ? 'mr-2' : ''} ${activeView === 'messages' ? 'text-sidebar-primary' : ''}`} />
+            <MessageSquare className={`h-5 w-5 ${(!collapsed || isMobile) ? 'mr-2' : ''}`} />
             {(!collapsed || isMobile) && <span>Messages</span>}
             {collapsed && !isMobile && activeView === 'messages' && (
               <div className="absolute left-0 w-1 h-6 bg-sidebar-primary rounded-r-full" />
@@ -162,7 +162,7 @@ export function Sidebar({ collapsed, onMenuClick, activeView, onToggleCollapse, 
             onClick={() => handleClick('repairs')}
             title={collapsed ? 'Repairs Help' : undefined}
           >
-            <Wrench className={`h-5 w-5 ${(!collapsed || isMobile) ? 'mr-2' : ''} ${activeView === 'repairs' ? 'text-sidebar-primary' : ''}`} />
+            <Wrench className={`h-5 w-5 ${(!collapsed || isMobile) ? 'mr-2' : ''}`} />
             {(!collapsed || isMobile) && <span>Repairs Help</span>}
             {collapsed && !isMobile && activeView === 'repairs' && (
               <div className="absolute left-0 w-1 h-6 bg-sidebar-primary rounded-r-full" />
@@ -179,7 +179,7 @@ export function Sidebar({ collapsed, onMenuClick, activeView, onToggleCollapse, 
             onClick={() => handleClick('account')}
             title={collapsed ? 'My Account' : undefined}
           >
-            <UserCircle className={`h-5 w-5 ${(!collapsed || isMobile) ? 'mr-2' : ''} ${activeView === 'account' ? 'text-sidebar-primary' : ''}`} />
+            <UserCircle className={`h-5 w-5 ${(!collapsed || isMobile) ? 'mr-2' : ''}`} />
             {(!collapsed || isMobile) && <span>My Account</span>}
             {collapsed && !isMobile && activeView === 'account' && (
               <div className="absolute left-0 w-1 h-6 bg-sidebar-primary rounded-r-full" />
@@ -200,7 +200,7 @@ export function Sidebar({ collapsed, onMenuClick, activeView, onToggleCollapse, 
             onClick={() => handleClick('find-home')}
             title={collapsed ? 'Find My Next Home' : undefined}
           >
-            <HomeIcon className={`h-5 w-5 ${(!collapsed || isMobile) ? 'mr-2' : ''} ${activeView === 'find-home' ? 'text-sidebar-primary' : ''}`} />
+            <HomeIcon className={`h-5 w-5 ${(!collapsed || isMobile) ? 'mr-2' : ''}`} />
             {(!collapsed || isMobile) && <span>Find My Next Home</span>}
             {collapsed && !isMobile && activeView === 'find-home' && (
               <div className="absolute left-0 w-1 h-6 bg-sidebar-primary rounded-r-full" />

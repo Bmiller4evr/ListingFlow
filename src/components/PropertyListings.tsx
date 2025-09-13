@@ -153,20 +153,6 @@ export function PropertyListings({
               <div className="flex items-center justify-center py-12">
                 <div className="text-muted-foreground">Loading listings...</div>
               </div>
-            ) : listings.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-12 px-4">
-                <div className="text-2xl mb-2">🏠</div>
-                <h3 className="text-lg font-semibold mb-2">No listings yet</h3>
-                <p className="text-muted-foreground text-center mb-6">
-                  Ready to list your property? Get started with just a few simple steps.
-                </p>
-                <Button 
-                  onClick={handleStartListingFlow}
-                  className="flex items-center gap-1 bg-brand-primary hover:bg-primary-hover text-white border-0"
-                >
-                  <Plus className="h-4 w-4" /> List Your First Home
-                </Button>
-              </div>
             ) : (
             <div className="overflow-hidden">
                 {/* Desktop: Table view */}
@@ -182,7 +168,25 @@ export function PropertyListings({
                       </tr>
                     </thead>
                     <tbody>
-                      {getFilteredListings().length > 0 ? (
+                      {listings.length === 0 ? (
+                        <tr>
+                          <td colSpan={5} className="p-0">
+                            <div className="flex flex-col items-center justify-center py-12 px-4">
+                              <div className="text-2xl mb-2">🏠</div>
+                              <h3 className="text-lg font-semibold mb-2">No listings yet</h3>
+                              <p className="text-muted-foreground text-center mb-6">
+                                Ready to list your property? Get started with just a few simple steps.
+                              </p>
+                              <Button 
+                                onClick={handleStartListingFlow}
+                                className="flex items-center gap-1 bg-brand-primary hover:bg-primary-hover text-white border-0"
+                              >
+                                <Plus className="h-4 w-4" /> List Your First Home
+                              </Button>
+                            </div>
+                          </td>
+                        </tr>
+                      ) : getFilteredListings().length > 0 ? (
                         getFilteredListings().map((listing) => (
                           <React.Fragment key={listing.id}>
                             <tr 
@@ -285,7 +289,21 @@ export function PropertyListings({
                 ) : (
                   /* Mobile: Card view */
                   <div className="space-y-3 p-4">
-                    {getFilteredListings().length > 0 ? (
+                    {listings.length === 0 ? (
+                      <div className="flex flex-col items-center justify-center py-12 px-4">
+                        <div className="text-2xl mb-2">🏠</div>
+                        <h3 className="text-lg font-semibold mb-2">No listings yet</h3>
+                        <p className="text-muted-foreground text-center mb-6">
+                          Ready to list your property? Get started with just a few simple steps.
+                        </p>
+                        <Button 
+                          onClick={handleStartListingFlow}
+                          className="flex items-center gap-1 bg-brand-primary hover:bg-primary-hover text-white border-0 w-full"
+                        >
+                          <Plus className="h-4 w-4" /> List Your First Home
+                        </Button>
+                      </div>
+                    ) : getFilteredListings().length > 0 ? (
                       getFilteredListings().map((listing) => (
                         <React.Fragment key={listing.id}>
                           <div 

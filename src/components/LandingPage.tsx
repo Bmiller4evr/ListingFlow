@@ -40,7 +40,7 @@ export function LandingPage({ onStartFlow, onSignIn }: LandingPageProps) {
           </div>
           <Button 
             onClick={onSignIn}
-            className="flex items-center gap-2 bg-blue hover:bg-blue/90 text-blue-foreground border-blue"
+            className="flex items-center gap-2 bg-brand-primary hover:bg-primary-hover text-white"
           >
             <LogIn className="h-4 w-4" />
             Sign In
