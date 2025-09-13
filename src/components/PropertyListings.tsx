@@ -1,10 +1,12 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { Button } from "./ui/button";
 import { Card, CardContent } from "./ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
-import { mockListings, PropertyListing } from "../data/mockData";
+import { mockListings as mockData, PropertyListing } from "../data/mockData";
 import { Plus, ChevronDown, ChevronRight } from "lucide-react";
+import { getCurrentUser } from "../lib/auth";
+import { isDevMode } from "../lib/devMode";
 import { Badge } from "./ui/badge";
 import { DraftListingProgressTracker } from "./DraftListingProgressTracker";
 import { useIsMobile } from "./ui/use-mobile";
@@ -23,10 +25,38 @@ export function PropertyListings({
   const isMobile = useIsMobile();
   const [activeTab, setActiveTab] = useState<string>("all");
   const [selectedDraftId, setSelectedDraftId] = useState<string | null>(null);
+  const [listings, setListings] = useState<PropertyListing[]>([]);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  
+  useEffect(() => {
+    loadListings();
+  }, []);
+  
+  const loadListings = async () => {
+    try {
+      const user = await getCurrentUser();
+      setUserEmail(user?.email || null);
+      
+      // Only show mock data if in dev mode
+      if (isDevMode(user?.email || null)) {
+        setListings(mockData);
+      } else {
+        // For real users, start with empty listings
+        // Later this will load from Supabase
+        setListings([]);
+      }
+    } catch (error) {
+      console.error('Error loading listings:', error);
+      setListings([]);
+    } finally {
+      setLoading(false);
+    }
+  };
   
   const getFilteredListings = () => {
-    if (activeTab === "all") return mockListings;
-    return mockListings.filter(listing => 
+    if (activeTab === "all") return listings;
+    return listings.filter(listing => 
       listing.status.toLowerCase() === activeTab.toLowerCase()
     );
   };
@@ -119,6 +149,25 @@ export function PropertyListings({
         
         <TabsContent value={activeTab} className="m-0">
           <CardContent className="p-0">
+            {loading ? (
+              <div className="flex items-center justify-center py-12">
+                <div className="text-muted-foreground">Loading listings...</div>
+              </div>
+            ) : listings.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-12 px-4">
+                <div className="text-2xl mb-2">🏠</div>
+                <h3 className="text-lg font-semibold mb-2">No listings yet</h3>
+                <p className="text-muted-foreground text-center mb-6">
+                  Ready to list your property? Get started with just a few simple steps.
+                </p>
+                <Button 
+                  onClick={handleStartListingFlow}
+                  className="flex items-center gap-1 bg-brand-primary hover:bg-primary-hover text-white border-0"
+                >
+                  <Plus className="h-4 w-4" /> List Your First Home
+                </Button>
+              </div>
+            ) : (
             <div className="overflow-hidden">
                 {/* Desktop: Table view */}
                 {!isMobile ? (
@@ -339,6 +388,7 @@ export function PropertyListings({
                   </div>
                 )}
             </div>
+            )}
           </CardContent>
         </TabsContent>
       </Tabs>
