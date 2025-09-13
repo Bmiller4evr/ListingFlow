@@ -3,7 +3,7 @@
 
 const DEV_MODE_EMAILS = [
   // Add your email here to enable dev mode for your account
-  'your-email@example.com', // Replace with your actual email
+  'bretmiller@gmail.com', // Your test account
   // You can add multiple developer emails here
 ];
 
