@@ -52,7 +52,7 @@ export function AuthForm({ onSuccess }: AuthFormProps) {
   }
 
   return (
-    <Card className="w-full max-w-md mx-auto">
+    <Card className="w-full max-w-md mx-auto bg-white dark:bg-gray-900">
       <CardHeader>
         <CardTitle>{isSignUp ? 'Create Account' : 'Sign In'}</CardTitle>
       </CardHeader>

@@ -16,7 +16,7 @@ export function SignInModal({ open, onOpenChange, onSignIn }: SignInModalProps) 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md w-full max-w-lg mx-auto">
+      <DialogContent className="sm:max-w-md w-full max-w-lg mx-auto bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700">
         <DialogHeader>
           <div className="flex items-center justify-center mb-4">
             <Home className="h-8 w-8 text-primary" />
