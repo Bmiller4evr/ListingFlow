@@ -9,7 +9,6 @@ import { SellerDisclosureForm } from "./SellerDisclosureForm";
 import { FinancialInfoForm } from "./FinancialInfoForm";
 import { AdditionalInformationForm, AdditionalInformationData } from "./AdditionalInformationForm";
 import { SecureAccessForm } from "./SecureAccessForm";
-import { PropertySurveillanceForm } from "./PropertySurveillanceForm";
 import { PropertyMediaForm } from "./PropertyMediaForm";
 import { ListingPriceForm } from "./ListingPriceForm";
 
@@ -27,7 +26,6 @@ export interface ListingCreationData {
   sellerDisclosure?: any;
   financialInfo?: any;
   additionalInfo?: AdditionalInformationData;
-  propertySurveillance?: any;
   secureAccess?: any;
   propertyMedia?: any;
   listingPrice?: any;
@@ -49,7 +47,6 @@ const STEP_ORDER: ListingCreationStep[] = [
   'mortgages-taxes-liens',
   'sellers-disclosure', 
   'additional-information',
-  'property-surveillance',
   'showing-access',
   'property-media',
   'listing-price',
@@ -155,15 +152,6 @@ export function ListingCreationFlow({
     onComplete();
   };
 
-  const handlePropertySurveillanceComplete = (propertySurveillance: any) => {
-    const updatedData = { ...listingData, propertySurveillance };
-    setListingData(updatedData);
-    
-    // Save progress and return to listings page
-    const draftId = `listing-${Date.now()}`;
-    saveDraftListingData(draftId, 'property-surveillance', updatedData);
-    onComplete();
-  };
 
   const handleFinancialInfoComplete = (financialInfo: any) => {
     const updatedData = { ...listingData, financialInfo };
@@ -266,13 +254,6 @@ export function ListingCreationFlow({
           />
         )}
 
-        {currentStep === 'property-surveillance' && (
-          <PropertySurveillanceForm
-            onNext={handlePropertySurveillanceComplete}
-            onExit={handleExit}
-            initialData={listingData.propertySurveillance}
-          />
-        )}
 
         {currentStep === 'mortgages-taxes-liens' && (
           <FinancialInfoForm
