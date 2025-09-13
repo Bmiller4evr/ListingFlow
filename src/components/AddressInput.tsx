@@ -243,7 +243,7 @@ export function AddressInput({
         <Button
           onClick={handleGetStarted}
           disabled={!isValidAddress || isLoading}
-          className="absolute right-3 top-1/2 transform -translate-y-1/2 px-6 py-3 rounded-lg bg-brand-primary hover:bg-primary-hover text-white"
+          className="absolute right-3 top-1/2 transform -translate-y-1/2 px-6 py-3 rounded-lg bg-primary hover:bg-primary/90 text-primary-foreground"
         >
           {isLoading ? "Loading..." : "Get Started"}
         </Button>
