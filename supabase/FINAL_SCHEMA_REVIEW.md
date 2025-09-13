@@ -22,9 +22,60 @@ After reviewing ALL 10 forms systematically, here's the corrected schema that ma
 ## 📁 CORRECTED Database Tables
 
 ### **Core Tables**
+
+#### **User Management (SSO-Aware)**
 ```sql
--- Users and properties (unchanged)
-profiles (id, email, full_name, phone, company, role, created_at, updated_at)
+-- Enhanced profiles (extends Supabase Auth)
+profiles
+├── id (UUID, PK) → references auth.users(id)
+├── email (TEXT, UNIQUE, NOT NULL) → synced from auth.users
+├── first_name (TEXT)
+├── last_name (TEXT)
+├── avatar_url (TEXT) → from SSO profile pics or uploaded
+├── phone (TEXT)
+├── company (TEXT)
+├── role (TEXT) → 'client', 'agent', 'admin'
+├── -- Address information
+├── street_address (TEXT)
+├── city (TEXT)
+├── state (TEXT)
+├── zip_code (TEXT)
+├── -- Preferences and settings
+├── notification_method (TEXT) → 'email', 'sms', 'both', 'none'
+├── timezone (TEXT) → user's timezone
+├── locale (TEXT) → for internationalization
+├── email_verified (BOOLEAN) → important for SSO validation
+├── -- SSO and metadata
+├── auth_provider_data (JSONB) → store provider-specific info
+├── onboarding_completed (BOOLEAN) → track if user finished setup
+├── last_active_at (TIMESTAMP)
+├── created_at (TIMESTAMP)
+└── updated_at (TIMESTAMP)
+
+-- Track linked authentication providers
+auth_providers
+├── id (UUID, PK)
+├── user_id (UUID, FK → profiles.id) NOT NULL
+├── provider (TEXT) → 'google', 'apple', 'facebook', 'email'
+├── provider_user_id (TEXT) → their ID from that provider
+├── provider_email (TEXT) → email from that provider
+├── linked_at (TIMESTAMP)
+├── metadata (JSONB) → provider-specific data
+└── UNIQUE(user_id, provider)
+
+-- User activity tracking
+user_activity
+├── id (UUID, PK)
+├── user_id (UUID, FK → profiles.id) NOT NULL
+├── action (TEXT) NOT NULL → 'login', 'logout', 'property_created', etc.
+├── resource_type (TEXT) → 'property', 'form', 'payment', etc.
+├── resource_id (UUID) → ID of the resource affected
+├── ip_address (INET)
+├── user_agent (TEXT)
+├── metadata (JSONB) → additional context
+└── created_at (TIMESTAMP)
+
+-- Core listing tables
 properties (id, user_id, status, completion_percentage, last_saved_step, listing_id, created_at, updated_at, published_at, sold_at)
 form_progress (id, property_id, form_name, status, started_at, completed_at)
 ```
@@ -327,4 +378,28 @@ additional_information.is_in_mud → Zoho: "Property_In_MUD_District"
 - ✅ **Texas-specific requirements** (MUD, PID, FEMA flood zones)
 - ✅ **Every question maps to a field** for Zoho CRM integration
 
-**This schema is now ready for production use with your exact form structure.**
+## 🔐 SSO Integration Notes
+
+**Supabase Auth Configuration:**
+- ✅ **Google OAuth** - Configure in Supabase Auth settings
+- ✅ **Apple OAuth** - Requires Apple Developer account setup  
+- ✅ **Facebook OAuth** - Configure Facebook App with proper permissions
+- ✅ **Email/Password** - Built-in Supabase functionality
+
+**SSO Data Flow:**
+1. User signs in with SSO provider
+2. Supabase Auth creates/links account in `auth.users`
+3. Our app creates/updates `profiles` record with provider data
+4. `auth_providers` table tracks which providers are linked
+5. First/last names extracted from provider profile or entered manually
+
+**Provider Data Mapping:**
+```javascript
+// Google: given_name, family_name, picture, email_verified
+// Apple: name.firstName, name.lastName, email (limited data)
+// Facebook: first_name, last_name, picture.data.url
+```
+
+**Note:** Payment/billing tables will be added later once Stripe integration is properly planned.
+
+**This schema is now ready for production use with SSO and your exact form structure.**
