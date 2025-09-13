@@ -3,10 +3,9 @@ import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { Button } from "./ui/button";
 import { Card, CardContent } from "./ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
-import { mockListings as mockData, PropertyListing } from "../data/mockData";
+import { PropertyListing } from "../data/mockData";
 import { Plus, ChevronDown, ChevronRight } from "lucide-react";
-import { getCurrentUser } from "../lib/auth";
-import { isDevMode } from "../lib/devMode";
+import { getListings } from "../lib/mockDataProvider";
 import { Badge } from "./ui/badge";
 import { DraftListingProgressTracker } from "./DraftListingProgressTracker";
 import { useIsMobile } from "./ui/use-mobile";
@@ -35,17 +34,8 @@ export function PropertyListings({
   
   const loadListings = async () => {
     try {
-      const user = await getCurrentUser();
-      setUserEmail(user?.email || null);
-      
-      // Only show mock data if in dev mode
-      if (isDevMode(user?.email || null)) {
-        setListings(mockData);
-      } else {
-        // For real users, start with empty listings
-        // Later this will load from Supabase
-        setListings([]);
-      }
+      const loadedListings = await getListings();
+      setListings(loadedListings);
     } catch (error) {
       console.error('Error loading listings:', error);
       setListings([]);

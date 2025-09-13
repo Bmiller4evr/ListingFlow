@@ -10,18 +10,8 @@ const DEV_MODE_EMAILS = [
 export function isDevMode(userEmail: string | null): boolean {
   if (!userEmail) return false;
   
-  // Check if user email is in dev list
-  if (DEV_MODE_EMAILS.includes(userEmail.toLowerCase())) {
-    return true;
-  }
-  
-  // Also check localStorage for dev mode toggle (for your account only)
-  if (DEV_MODE_EMAILS.includes(userEmail.toLowerCase())) {
-    const devModeEnabled = localStorage.getItem('devMode') === 'true';
-    return devModeEnabled;
-  }
-  
-  return false;
+  // Only dev emails can see mock data
+  return DEV_MODE_EMAILS.includes(userEmail.toLowerCase());
 }
 
 export function toggleDevMode(userEmail: string | null): boolean {
