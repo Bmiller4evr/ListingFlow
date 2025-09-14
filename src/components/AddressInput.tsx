@@ -147,33 +147,70 @@ export function AddressInput({
           }
 
           const initAutocomplete = () => {
-            // Use legacy Autocomplete API (more reliable)
-            const autocompleteOptions: google.maps.places.AutocompleteOptions = {
-              types: ['address'],
-              componentRestrictions: { country: 'us' },
-              fields: ['formatted_address', 'geometry', 'address_components', 'place_id'],
-              // Bias results to Dallas-Fort Worth area
-              bounds: new window.google.maps.LatLngBounds(
-                new window.google.maps.LatLng(32.5, -97.5),  // Southwest corner (roughly Cleburne)
-                new window.google.maps.LatLng(33.1, -96.5)   // Northeast corner (roughly McKinney)
-              ),
-              strictBounds: false // Prefer DFW area, but still allow other locations
-            };
+            try {
+              // Try to use new PlaceAutocompleteElement first (recommended)
+              if (window.google?.maps?.places?.PlaceAutocompleteElement) {
+                console.log('Using new PlaceAutocompleteElement API');
+                
+                const autocompleteElement = new window.google.maps.places.PlaceAutocompleteElement({
+                  types: ['address'],
+                  componentRestrictions: { country: 'us' },
+                  locationBias: new window.google.maps.LatLngBounds(
+                    new window.google.maps.LatLng(32.5, -97.5),
+                    new window.google.maps.LatLng(33.1, -96.5)
+                  )
+                });
 
-            const autocomplete = new window.google.maps.places.Autocomplete(
-              inputRef.current!,
-              autocompleteOptions
-            );
+                autocompleteElement.connectTo(inputRef.current!);
+                
+                autocompleteElement.addEventListener('gmp-placeselect', (event: any) => {
+                  const place = event.place;
+                  if (place && place.formattedAddress) {
+                    setAddress(place.formattedAddress);
+                    setSelectedPlace({
+                      formatted_address: place.formattedAddress,
+                      geometry: place.geometry,
+                      address_components: place.addressComponents,
+                      place_id: place.id
+                    });
+                  }
+                });
 
-            autocomplete.addListener('place_changed', () => {
-              const place = autocomplete.getPlace();
-              if (place && place.formatted_address) {
-                setAddress(place.formatted_address);
-                setSelectedPlace(place);
+                autocompleteRef.current = autocompleteElement as any;
+              } else {
+                console.log('Falling back to legacy Autocomplete API');
+                
+                // Fallback to legacy API
+                const autocompleteOptions: google.maps.places.AutocompleteOptions = {
+                  types: ['address'],
+                  componentRestrictions: { country: 'us' },
+                  fields: ['formatted_address', 'geometry', 'address_components', 'place_id'],
+                  bounds: new window.google.maps.LatLngBounds(
+                    new window.google.maps.LatLng(32.5, -97.5),
+                    new window.google.maps.LatLng(33.1, -96.5)
+                  ),
+                  strictBounds: false
+                };
+
+                const autocomplete = new window.google.maps.places.Autocomplete(
+                  inputRef.current!,
+                  autocompleteOptions
+                );
+
+                autocomplete.addListener('place_changed', () => {
+                  const place = autocomplete.getPlace();
+                  if (place && place.formatted_address) {
+                    setAddress(place.formatted_address);
+                    setSelectedPlace(place);
+                  }
+                });
+
+                autocompleteRef.current = autocomplete as any;
               }
-            });
-
-            autocompleteRef.current = autocomplete as any;
+            } catch (error) {
+              console.error('Failed to initialize autocomplete:', error);
+              setHasError(true);
+            }
           };
 
           // Initialize autocomplete with DFW bias
