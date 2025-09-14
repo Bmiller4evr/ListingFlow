@@ -29,6 +29,9 @@ export function AddressInput({
     const initializeGoogleMaps = () => {
       // Check if we have an API key
       const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+      console.log('Environment check - API key available:', !!apiKey);
+      console.log('All env vars:', import.meta.env);
+      
       if (!apiKey) {
         console.warn('VITE_GOOGLE_MAPS_API_KEY not found. Using fallback behavior.');
         setHasError(true);
