@@ -231,7 +231,7 @@ export function AddressInput({
         <Input
           ref={inputRef}
           type="text"
-          placeholder={hasError ? "Enter your address (e.g., 123 Main St, City, State)" : (isLoading ? "Loading address suggestions..." : placeholder)}
+          placeholder={hasError ? "Enter your address" : (isLoading ? "Loading address suggestions..." : placeholder)}
           value={address}
           onChange={handleInputChange}
           onKeyPress={handleKeyPress}
