@@ -196,7 +196,7 @@ export function AddressInput({
           console.warn('Failed to initialize Google Places autocomplete:', error);
           setHasError(true);
         }
-      }, 500); // Give Places API time to load
+      }, 500);
     }
 
     return () => {
