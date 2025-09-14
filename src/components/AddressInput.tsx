@@ -29,9 +29,6 @@ export function AddressInput({
     const initializeGoogleMaps = () => {
       // Check if we have an API key
       const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
-      console.log('Environment check - API key available:', !!apiKey);
-      console.log('All env vars:', import.meta.env);
-      
       if (!apiKey) {
         console.warn('VITE_GOOGLE_MAPS_API_KEY not found. Using fallback behavior.');
         setHasError(true);
@@ -72,11 +69,17 @@ export function AddressInput({
 
       setIsLoading(true);
 
-      // Load Google Maps script
+      // Load Google Maps script - only for Places API, no map rendering
       const script = document.createElement('script');
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&loading=async`;
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&loading=async&callback=__googleMapsCallback`;
       script.async = true;
       script.defer = true;
+      
+      // Define callback to prevent automatic map initialization
+      (window as any).__googleMapsCallback = () => {
+        console.log('Google Maps Places API loaded (no map rendering)');
+      };
+      
       script.onload = () => {
         // Check if API key is valid by testing a simple API call
         if (window.google && window.google.maps) {
@@ -150,8 +153,6 @@ export function AddressInput({
             try {
               // Try to use new PlaceAutocompleteElement first (recommended)
               if (window.google?.maps?.places?.PlaceAutocompleteElement) {
-                console.log('Using new PlaceAutocompleteElement API');
-                
                 const autocompleteElement = new window.google.maps.places.PlaceAutocompleteElement({
                   types: ['address'],
                   componentRestrictions: { country: 'us' },
@@ -178,8 +179,6 @@ export function AddressInput({
 
                 autocompleteRef.current = autocompleteElement as any;
               } else {
-                console.log('Falling back to legacy Autocomplete API');
-                
                 // Fallback to legacy API
                 const autocompleteOptions: google.maps.places.AutocompleteOptions = {
                   types: ['address'],
