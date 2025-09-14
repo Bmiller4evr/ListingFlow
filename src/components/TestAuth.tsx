@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { AuthForm } from './auth/AuthForm'
+import { UnifiedAuthForm } from './auth/UnifiedAuthForm'
 import { getCurrentUser, signOut } from '../lib/auth'
 import { Button } from './ui/button'
 import { Card, CardHeader, CardTitle, CardContent } from './ui/card'
@@ -58,7 +58,7 @@ export function TestAuth() {
         <h1 className="text-2xl font-bold">Authentication Test</h1>
         <p className="text-gray-600 mt-2">Test email/password authentication with Supabase</p>
       </div>
-      <AuthForm onSuccess={checkUser} />
+      <UnifiedAuthForm mode="signin" onSuccess={checkUser} />
     </div>
   )
 }

@@ -5,6 +5,10 @@ import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { ArrowLeft, ArrowRight, User, Mail, Phone, Lock } from "lucide-react";
 import { formatPhoneNumber, validatePhoneNumber } from "./phone-utils";
+import { validatePassword } from "../../utils/password-validation";
+import { useAuth } from "../../contexts/AuthContext";
+import { toast } from "sonner";
+import { getAuthErrorMessage, isRetryableError } from "../../utils/auth-errors";
 
 export interface UserAccountData {
   firstName: string;
@@ -35,6 +39,7 @@ export function AccountConfirmationForm({
   initialData, 
   ssoData 
 }: AccountConfirmationFormProps) {
+  const { signUp } = useAuth();
   const [formData, setFormData] = useState<Partial<UserAccountData>>({
     firstName: ssoData?.firstName || initialData?.firstName || '',
     lastName: ssoData?.lastName || initialData?.lastName || '',
@@ -46,6 +51,8 @@ export function AccountConfirmationForm({
   });
 
   const [phoneError, setPhoneError] = useState<string>('');
+  const [passwordErrors, setPasswordErrors] = useState<string[]>([]);
+  const [isCreatingAccount, setIsCreatingAccount] = useState(false);
 
   const handleInputChange = (field: keyof UserAccountData, value: string | boolean) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -53,6 +60,11 @@ export function AccountConfirmationForm({
     // Clear phone error when user starts typing
     if (field === 'phone') {
       setPhoneError('');
+    }
+    
+    // Clear password errors when user starts typing
+    if (field === 'password') {
+      setPasswordErrors([]);
     }
   };
 
@@ -71,8 +83,11 @@ export function AccountConfirmationForm({
     // Validate phone number without setting error
     if (!validatePhoneNumber(formData.phone)) return false;
     
-    // Require password for email signup
-    if (authMethod === 'email' && !formData.password?.trim()) return false;
+    // Require password for email signup and validate it
+    if (authMethod === 'email') {
+      if (!formData.password?.trim()) return false;
+      if (!validatePassword(formData.password).isValid) return false;
+    }
     
     return true;
   };
@@ -89,14 +104,66 @@ export function AccountConfirmationForm({
       return false;
     }
     
-    // Require password for email signup
-    if (authMethod === 'email' && !formData.password?.trim()) return false;
+    // Require password for email signup and validate it
+    if (authMethod === 'email') {
+      if (!formData.password?.trim()) return false;
+      const passwordValidation = validatePassword(formData.password);
+      if (!passwordValidation.isValid) {
+        setPasswordErrors(passwordValidation.errors);
+        return false;
+      }
+    }
     
     return true;
   };
 
-  const handleSubmit = () => {
-    if (validateForm()) {
+  const handleSubmit = async () => {
+    if (!validateForm()) {
+      return;
+    }
+
+    // For email signup, create actual Supabase account
+    if (authMethod === 'email' && formData.email && formData.password) {
+      setIsCreatingAccount(true);
+      
+      try {
+        const result = await signUp(
+          formData.email,
+          formData.password,
+          formData.firstName,
+          formData.lastName
+        );
+
+        if (result.success) {
+          // Check if this was a demo fallback (for development)
+          const isDemoUser = result.user?.id?.toString().startsWith('demo-');
+          if (isDemoUser) {
+            toast.success('Account created successfully! (Demo mode - database not configured)');
+          } else {
+            toast.success('Account created successfully!');
+          }
+          onNext(formData as UserAccountData);
+        } else {
+          const errorMessage = getAuthErrorMessage(result.error);
+          toast.error(errorMessage);
+          console.error('Account creation error:', result.error);
+          
+          // Show retry suggestion for retryable errors
+          if (isRetryableError(result.error)) {
+            setTimeout(() => {
+              toast.info('You can try again when ready', { duration: 3000 });
+            }, 2000);
+          }
+        }
+      } catch (error) {
+        const errorMessage = getAuthErrorMessage(error);
+        toast.error(errorMessage);
+        console.error('Account creation error:', error);
+      } finally {
+        setIsCreatingAccount(false);
+      }
+    } else {
+      // For SSO methods, proceed without creating account (would be handled by actual SSO in production)
       onNext(formData as UserAccountData);
     }
   };
@@ -204,7 +271,18 @@ export function AccountConfirmationForm({
                 placeholder="Create a secure password"
                 value={formData.password}
                 onChange={(e) => handleInputChange('password', e.target.value)}
+                className={passwordErrors.length > 0 ? 'border-destructive' : ''}
               />
+              {passwordErrors.length > 0 && (
+                <div className="space-y-1">
+                  {passwordErrors.map((error, index) => (
+                    <p key={index} className="text-sm text-destructive">{error}</p>
+                  ))}
+                </div>
+              )}
+              <p className="text-xs text-muted-foreground mt-1">
+                Password must be at least 6 characters with 1 letter and 1 number
+              </p>
             </div>
           )}
         </div>
@@ -236,11 +314,11 @@ export function AccountConfirmationForm({
 
           <Button
             onClick={handleSubmit}
-            disabled={!isFormValid()}
+            disabled={!isFormValid() || isCreatingAccount}
             className="flex items-center"
           >
-            Create Account
-            <ArrowRight className="h-4 w-4 ml-2" />
+            {isCreatingAccount ? 'Creating Account...' : 'Create Account'}
+            {!isCreatingAccount && <ArrowRight className="h-4 w-4 ml-2" />}
           </Button>
         </div>
       </CardContent>

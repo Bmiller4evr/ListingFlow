@@ -40,7 +40,14 @@ const getStripePublishableKey = () => {
   return 'pk_test_YOUR_STRIPE_PUBLISHABLE_KEY_HERE';
 };
 
-const stripePromise = loadStripe(getStripePublishableKey());
+// Lazy load Stripe only when payment form is needed
+let stripePromise: Promise<any> | null = null;
+const getStripePromise = () => {
+  if (!stripePromise) {
+    stripePromise = loadStripe(getStripePublishableKey());
+  }
+  return stripePromise;
+};
 
 interface ListingServiceFormProps {
   onNext: (data: ListingServiceData) => void;
@@ -524,7 +531,7 @@ export function ListingServiceForm({ onNext, onExit, initialData, userAccount }:
   );
 
   return (
-    <Elements stripe={stripePromise}>
+    <Elements stripe={getStripePromise()}>
       <Card className="border-none shadow-none">
         <CardHeader className="relative">
           {/* Exit Button */}

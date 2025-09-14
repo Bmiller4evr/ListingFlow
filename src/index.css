@@ -1,6 +1,173 @@
-/* Import Access Realty brand styles */
-@import './styles/globals.css';
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Access Realty Brand Colors */
+:root {
+  /* Primary Brand Colors */
+  --primary: #2C5282;
+  --primary-foreground: #ffffff;
+  --primary-hover: #1E3A8A;
+  --primary-active: #1E40AF;
+  
+  /* Secondary Brand Colors */
+  --secondary: #D4A574;
+  --secondary-foreground: #ffffff;
+  --secondary-hover: #B8935C;
+  --secondary-active: #A67C52;
+  
+  /* Action Colors */
+  --success: #10B981;
+  --success-foreground: #ffffff;
+  --success-hover: #059669;
+  
+  --destructive: #EF4444;
+  --destructive-foreground: #ffffff;
+  --destructive-hover: #DC2626;
+  
+  --warning: #F59E0B;
+  --warning-foreground: #ffffff;
+  --warning-hover: #D97706;
+  
+  --info: #3B82F6;
+  --info-foreground: #ffffff;
+  --info-hover: #2563EB;
+  
+  /* Base Colors */
+  --background: #ffffff;
+  --foreground: #1F2937;
+  --card: #F8FAFC;
+  --card-foreground: #374151;
+  --muted: #F9FAFB;
+  --muted-foreground: #6B7280;
+  --accent: #EFF6FF;
+  --accent-foreground: #1E40AF;
+  --border: #E5E7EB;
+  --input: transparent;
+  --ring: #93C5FD;
+  
+  /* Your preferred rounded corners from Figma */
+  --radius: 0.625rem; /* 10px - nice soft corners */
+}
+
+/* Form progression button styling */
+@layer components {
+  /* Intermediate step buttons - subtle, less prominent */
+  .btn-next {
+    background-color: var(--secondary);
+    color: var(--secondary-foreground);
+    border: 1px solid var(--secondary);
+  }
+  
+  .btn-next:hover {
+    background-color: var(--secondary-hover);
+  }
+  
+  /* Final completion buttons - bold, prominent */
+  .btn-complete {
+    background-color: var(--success);
+    color: var(--success-foreground);
+    border: 1px solid var(--success);
+    font-weight: 600;
+  }
+  
+  .btn-complete:hover {
+    background-color: var(--success-hover);
+  }
+  
+  /* Continue/Save Draft - outline style */
+  .btn-continue {
+    background-color: transparent;
+    color: var(--primary);
+    border: 1px solid var(--primary);
+  }
+  
+  .btn-continue:hover {
+    background-color: var(--primary);
+    color: var(--primary-foreground);
+  }
+  
+  /* === YOUR SPECIFIC STYLE PREFERENCES === */
+  
+  /* Form Layout Patterns */
+  .form-container {
+    @apply space-y-6;
+  }
+  
+  .form-section {
+    @apply space-y-4;
+  }
+  
+  /* Progress Indicators - Your exact style */
+  .progress-indicator {
+    @apply flex items-center justify-between mb-6;
+  }
+  
+  .progress-text {
+    @apply text-sm text-muted-foreground;
+  }
+  
+  /* Card Headers - Centered with icons */
+  .form-header {
+    @apply text-center text-2xl;
+  }
+  
+  .form-header-with-icon {
+    @apply text-center text-2xl flex items-center justify-center;
+  }
+  
+  /* Navigation Section - Your consistent pattern */
+  .form-navigation {
+    @apply flex justify-between pt-6 border-t;
+  }
+  
+  /* Navigation Buttons - Your exact styling */
+  .nav-back-button {
+    @apply flex items-center;
+    /* variant="outline" + ArrowLeft icon + "Back" text */
+  }
+  
+  /* Exit Button - Always top-right positioned */
+  .form-exit-button {
+    @apply absolute right-4 top-4;
+    /* variant="ghost" + size="icon" + X icon */
+  }
+  
+  /* Information Cards - Your gray informational style */
+  .info-card {
+    @apply border-2 border-gray-300 bg-gray-50 p-4 rounded-lg;
+  }
+  
+  .info-card-detailed {
+    @apply border-2 border-gray-300 bg-gray-50 p-4 rounded-lg space-y-4;
+  }
+  
+  /* Info Lists - Your consistent list styling */
+  .info-list-title {
+    @apply font-medium text-gray-800 mb-2;
+  }
+  
+  .info-list {
+    @apply text-sm text-gray-800 space-y-1 list-disc pl-4;
+  }
+  
+  /* Grid Layouts - Your preferred spacing */
+  .form-grid-2 {
+    @apply grid grid-cols-2 gap-3;
+  }
+  
+  /* Help Text */
+  .form-help-text {
+    @apply text-sm text-muted-foreground mt-1;
+  }
+  
+  /* Final Action Button - Your green completion style */
+  .final-action-button {
+    background-color: #16a34a !important; /* green-600 */
+    color: white !important;
+  }
+  
+  .final-action-button:hover {
+    background-color: #15803d !important; /* green-700 */
+  }
+}

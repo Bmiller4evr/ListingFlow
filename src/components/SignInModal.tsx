@@ -1,6 +1,6 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
 import { Home } from "lucide-react";
-import { AuthForm } from "./auth/AuthForm";
+import { UnifiedAuthForm } from "./auth/UnifiedAuthForm";
 
 interface SignInModalProps {
   open: boolean;
@@ -24,13 +24,12 @@ export function SignInModal({ open, onOpenChange, onSignIn }: SignInModalProps) 
           <DialogTitle className="text-center">Access Realty</DialogTitle>
         </DialogHeader>
         
-        <AuthForm onSuccess={handleAuthSuccess} />
-        
-        <div className="pt-4 border-t">
-          <p className="text-xs text-muted-foreground text-center">
-            By signing in, you agree to our Terms of Service and Privacy Policy.
-          </p>
-        </div>
+        <UnifiedAuthForm 
+          mode="signin"
+          onSuccess={handleAuthSuccess}
+          showExitButton={false}
+          allowModeSwitch={false}
+        />
       </DialogContent>
     </Dialog>
   );

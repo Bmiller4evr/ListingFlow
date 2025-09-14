@@ -5,6 +5,7 @@ import { Input } from '../ui/input'
 import { Card, CardHeader, CardTitle, CardContent } from '../ui/card'
 import { Label } from '../ui/label'
 import { Alert, AlertDescription } from '../ui/alert'
+import { validatePassword } from '../../utils/password-validation'
 
 interface AuthFormProps {
   onSuccess?: () => void
@@ -19,12 +20,22 @@ export function AuthForm({ onSuccess }: AuthFormProps) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
+  const [passwordErrors, setPasswordErrors] = useState<string[]>([])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     setError(null)
     setSuccess(null)
+    setPasswordErrors([])
+
+    // Validate password for both sign up and sign in to ensure consistency
+    const passwordValidation = validatePassword(password)
+    if (!passwordValidation.isValid) {
+      setPasswordErrors(passwordValidation.errors)
+      setLoading(false)
+      return
+    }
 
     if (isSignUp) {
       const result = await signUpWithEmail(email, password, firstName, lastName)
@@ -103,11 +114,24 @@ export function AuthForm({ onSuccess }: AuthFormProps) {
               id="password"
               type="password"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={(e) => {
+                setPassword(e.target.value)
+                setPasswordErrors([])
+              }}
               required
               placeholder={isSignUp ? "Create a password" : "Enter your password"}
-              minLength={6}
+              className={passwordErrors.length > 0 ? 'border-destructive' : ''}
             />
+            {passwordErrors.length > 0 && (
+              <div className="space-y-1 mt-1">
+                {passwordErrors.map((error, index) => (
+                  <p key={index} className="text-sm text-destructive">{error}</p>
+                ))}
+              </div>
+            )}
+            <p className="text-xs text-muted-foreground mt-1">
+              Password must be at least 6 characters with 1 letter and 1 number
+            </p>
           </div>
 
           {error && (
