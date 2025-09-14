@@ -143,25 +143,38 @@ export function AddressInput({
             return;
           }
 
-          // Use legacy Autocomplete API (more reliable)
-          const autocomplete = new window.google.maps.places.Autocomplete(
-            inputRef.current!,
-            {
+          const initAutocomplete = () => {
+            // Use legacy Autocomplete API (more reliable)
+            const autocompleteOptions: google.maps.places.AutocompleteOptions = {
               types: ['address'],
               componentRestrictions: { country: 'us' },
-              fields: ['formatted_address', 'geometry', 'address_components', 'place_id']
-            }
-          );
+              fields: ['formatted_address', 'geometry', 'address_components', 'place_id'],
+              // Bias results to Dallas-Fort Worth area
+              bounds: new window.google.maps.LatLngBounds(
+                new window.google.maps.LatLng(32.5, -97.5),  // Southwest corner (roughly Cleburne)
+                new window.google.maps.LatLng(33.1, -96.5)   // Northeast corner (roughly McKinney)
+              ),
+              strictBounds: false // Prefer DFW area, but still allow other locations
+            };
 
-          autocomplete.addListener('place_changed', () => {
-            const place = autocomplete.getPlace();
-            if (place && place.formatted_address) {
-              setAddress(place.formatted_address);
-              setSelectedPlace(place);
-            }
-          });
+            const autocomplete = new window.google.maps.places.Autocomplete(
+              inputRef.current!,
+              autocompleteOptions
+            );
 
-          autocompleteRef.current = autocomplete as any;
+            autocomplete.addListener('place_changed', () => {
+              const place = autocomplete.getPlace();
+              if (place && place.formatted_address) {
+                setAddress(place.formatted_address);
+                setSelectedPlace(place);
+              }
+            });
+
+            autocompleteRef.current = autocomplete as any;
+          };
+
+          // Initialize autocomplete with DFW bias
+          initAutocomplete();
         } catch (error) {
           console.warn('Failed to initialize Google Places autocomplete:', error);
           setHasError(true);
