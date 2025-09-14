@@ -199,9 +199,15 @@ export function AddressInput({
   };
 
   const handleGetStarted = () => {
-    if (address.trim()) {
+    // Only proceed if we have a valid address from autocomplete or a reasonably complete address
+    if (selectedPlace && selectedPlace.formatted_address) {
+      // User selected from autocomplete - this is valid
       onAddressSelected(address, selectedPlace);
+    } else if (address.trim().length > 10 && address.includes(' ')) {
+      // Manual entry - check it looks like a real address (has space and reasonable length)
+      onAddressSelected(address, null);
     }
+    // Otherwise, don't submit - the address is too short/invalid
   };
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -210,7 +216,11 @@ export function AddressInput({
     }
   };
 
-  const isValidAddress = address.trim().length > 5; // Basic validation
+  // Address is valid if selected from autocomplete OR looks like a real address
+  const isValidAddress = !!(
+    (selectedPlace && selectedPlace.formatted_address) || 
+    (address.trim().length > 10 && address.includes(' '))
+  );
 
   return (
     <div className={cn("relative max-w-2xl", className)}>
