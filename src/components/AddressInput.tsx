@@ -146,77 +146,43 @@ export function AddressInput({
 
           const initAutocomplete = () => {
             try {
-              // Try to use new PlaceAutocompleteElement first (recommended)
-              if (window.google?.maps?.places?.PlaceAutocompleteElement) {
-                const autocompleteElement = new window.google.maps.places.PlaceAutocompleteElement({
-                  types: ['address'],
-                  componentRestrictions: { country: 'us' },
-                  locationBias: new window.google.maps.LatLngBounds(
-                    new window.google.maps.LatLng(32.5, -97.5),
-                    new window.google.maps.LatLng(33.1, -96.5)
-                  ),
-                  requestedRegion: 'US'
-                });
+              // Use legacy Autocomplete API which is more reliable
+              const autocompleteOptions: google.maps.places.AutocompleteOptions = {
+                types: ['address'],
+                componentRestrictions: { country: 'us' },
+                fields: ['formatted_address', 'geometry', 'address_components', 'place_id'],
+                bounds: new window.google.maps.LatLngBounds(
+                  new window.google.maps.LatLng(32.5, -97.5),
+                  new window.google.maps.LatLng(33.1, -96.5)
+                ),
+                strictBounds: false
+              };
 
-                autocompleteElement.connectTo(inputRef.current!);
-                
-                // Add CSS to fix dropdown positioning
-                const style = document.createElement('style');
-                style.textContent = `
-                  gmp-place-autocomplete-element {
-                    position: relative !important;
-                  }
-                  gmp-place-autocomplete-element .gm-autocomplete-dropdown {
-                    position: absolute !important;
-                    z-index: 9999 !important;
-                  }
-                `;
-                if (!document.head.querySelector('style[data-gmp-autocomplete]')) {
-                  style.setAttribute('data-gmp-autocomplete', 'true');
-                  document.head.appendChild(style);
+              const autocomplete = new window.google.maps.places.Autocomplete(
+                inputRef.current!,
+                autocompleteOptions
+              );
+
+              autocomplete.addListener('place_changed', () => {
+                const place = autocomplete.getPlace();
+                if (place && place.formatted_address) {
+                  setAddress(place.formatted_address);
+                  setSelectedPlace(place);
                 }
-                
-                autocompleteElement.addEventListener('gmp-placeselect', (event: any) => {
-                  const place = event.place;
-                  if (place && place.formattedAddress) {
-                    setAddress(place.formattedAddress);
-                    setSelectedPlace({
-                      formatted_address: place.formattedAddress,
-                      geometry: place.geometry,
-                      address_components: place.addressComponents,
-                      place_id: place.id
-                    });
-                  }
-                });
+              });
 
-                autocompleteRef.current = autocompleteElement as any;
-              } else {
-                // Fallback to legacy API
-                const autocompleteOptions: google.maps.places.AutocompleteOptions = {
-                  types: ['address'],
-                  componentRestrictions: { country: 'us' },
-                  fields: ['formatted_address', 'geometry', 'address_components', 'place_id'],
-                  bounds: new window.google.maps.LatLngBounds(
-                    new window.google.maps.LatLng(32.5, -97.5),
-                    new window.google.maps.LatLng(33.1, -96.5)
-                  ),
-                  strictBounds: false
-                };
-
-                const autocomplete = new window.google.maps.places.Autocomplete(
-                  inputRef.current!,
-                  autocompleteOptions
-                );
-
-                autocomplete.addListener('place_changed', () => {
-                  const place = autocomplete.getPlace();
-                  if (place && place.formatted_address) {
-                    setAddress(place.formatted_address);
-                    setSelectedPlace(place);
-                  }
-                });
-
-                autocompleteRef.current = autocomplete as any;
+              autocompleteRef.current = autocomplete as any;
+              
+              // Add CSS to improve dropdown positioning
+              const style = document.createElement('style');
+              style.textContent = `
+                .pac-container {
+                  z-index: 9999 !important;
+                }
+              `;
+              if (!document.head.querySelector('style[data-pac-style]')) {
+                style.setAttribute('data-pac-style', 'true');
+                document.head.appendChild(style);
               }
             } catch (error) {
               console.error('Failed to initialize autocomplete:', error);
