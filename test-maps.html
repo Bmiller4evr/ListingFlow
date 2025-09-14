@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Google Maps API</title>
+    <script>
+        // Test if API key is working
+        function initMap() {
+            console.log('Google Maps loaded successfully!');
+            document.getElementById('status').innerHTML = '✅ Google Maps API loaded successfully!';
+            
+            // Test Places API
+            if (window.google.maps.places) {
+                console.log('Places API is available');
+                document.getElementById('places-status').innerHTML = '✅ Places API is available';
+            } else {
+                console.log('Places API is NOT available');
+                document.getElementById('places-status').innerHTML = '❌ Places API is NOT available';
+            }
+        }
+        
+        window.gm_authFailure = function() {
+            console.error('Google Maps authentication failed!');
+            document.getElementById('status').innerHTML = '❌ Authentication failed - Check API key and restrictions';
+        };
+    </script>
+</head>
+<body>
+    <h1>Google Maps API Test</h1>
+    <p id="status">Loading Google Maps...</p>
+    <p id="places-status">Checking Places API...</p>
+    
+    <h2>Test Autocomplete:</h2>
+    <input id="autocomplete" placeholder="Enter your address" style="width: 300px; padding: 10px;">
+    
+    <script>
+        // Load Google Maps with your API key
+        const script = document.createElement('script');
+        script.src = 'https://maps.googleapis.com/maps/api/js?key=AIzaSyC9KPv9-xJcR05awennWuLZ2wu9U_KLb2A&libraries=places&callback=initMap';
+        script.async = true;
+        script.defer = true;
+        document.head.appendChild(script);
+        
+        // Initialize autocomplete after map loads
+        script.onload = function() {
+            setTimeout(() => {
+                if (window.google && window.google.maps && window.google.maps.places) {
+                    const input = document.getElementById('autocomplete');
+                    const autocomplete = new google.maps.places.Autocomplete(input);
+                    console.log('Autocomplete initialized');
+                }
+            }, 1000);
+        };
+    </script>
+</body>
+</html>
