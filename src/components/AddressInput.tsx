@@ -71,14 +71,9 @@ export function AddressInput({
 
       // Load Google Maps script - only for Places API, no map rendering
       const script = document.createElement('script');
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&loading=async&callback=__googleMapsCallback`;
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&loading=async`;
       script.async = true;
       script.defer = true;
-      
-      // Define callback to prevent automatic map initialization
-      (window as any).__googleMapsCallback = () => {
-        console.log('Google Maps Places API loaded (no map rendering)');
-      };
       
       script.onload = () => {
         // Check if API key is valid by testing a simple API call
@@ -159,10 +154,27 @@ export function AddressInput({
                   locationBias: new window.google.maps.LatLngBounds(
                     new window.google.maps.LatLng(32.5, -97.5),
                     new window.google.maps.LatLng(33.1, -96.5)
-                  )
+                  ),
+                  requestedRegion: 'US'
                 });
 
                 autocompleteElement.connectTo(inputRef.current!);
+                
+                // Add CSS to fix dropdown positioning
+                const style = document.createElement('style');
+                style.textContent = `
+                  gmp-place-autocomplete-element {
+                    position: relative !important;
+                  }
+                  gmp-place-autocomplete-element .gm-autocomplete-dropdown {
+                    position: absolute !important;
+                    z-index: 9999 !important;
+                  }
+                `;
+                if (!document.head.querySelector('style[data-gmp-autocomplete]')) {
+                  style.setAttribute('data-gmp-autocomplete', 'true');
+                  document.head.appendChild(style);
+                }
                 
                 autocompleteElement.addEventListener('gmp-placeselect', (event: any) => {
                   const place = event.place;
