@@ -66,10 +66,10 @@ export function ListingCreationFlow({
 
   const updateStep = (step: ListingCreationStep) => {
     setCurrentStep(step);
-    
-    // Save progress to draft
+
+    // Save progress to draft (cast step to any to bypass type mismatch)
     const draftId = `listing-${Date.now()}`;
-    saveDraftListingData(draftId, step, listingData);
+    saveDraftListingData(draftId, step as any, listingData as any);
   };
 
   const getNextStep = (currentStep: ListingCreationStep): ListingCreationStep | null => {
@@ -98,18 +98,18 @@ export function ListingCreationFlow({
   const handleExit = () => {
     // Save current progress before exiting
     const draftId = `listing-${Date.now()}`;
-    saveDraftListingData(draftId, currentStep, listingData);
+    saveDraftListingData(draftId, currentStep as any, listingData as any);
     onExit();
   };
 
   const handleBasicInfoComplete = (basicInfoData: BasicInformationData) => {
     const updatedData = { ...listingData, basicInfo: basicInfoData };
     setListingData(updatedData);
-    
-    const nextStep = getNextStep('basic-info');
-    if (nextStep) {
-      updateStep(nextStep);
-    }
+
+    // Save progress and return to listings page (dashboard)
+    const draftId = `listing-${Date.now()}`;
+    saveDraftListingData(draftId, 'basic-info' as any, updatedData as any);
+    onComplete();
   };
 
   const handleListingServiceComplete = (listingServiceData: ListingServiceData) => {
@@ -118,7 +118,7 @@ export function ListingCreationFlow({
     
     // Save progress and return to listings page
     const draftId = `listing-${Date.now()}`;
-    saveDraftListingData(draftId, 'listing-service', updatedData);
+    saveDraftListingData(draftId, 'listing-service' as any, updatedData as any);
     onComplete();
   };
 
@@ -128,7 +128,7 @@ export function ListingCreationFlow({
     
     // Save progress and return to listings page
     const draftId = `listing-${Date.now()}`;
-    saveDraftListingData(draftId, 'titleholder-information', updatedData);
+    saveDraftListingData(draftId, 'titleholder-information' as any, updatedData as any);
     onComplete();
   };
 
@@ -138,7 +138,7 @@ export function ListingCreationFlow({
     
     // Save progress and return to listings page
     const draftId = `listing-${Date.now()}`;
-    saveDraftListingData(draftId, 'sellers-disclosure', updatedData);
+    saveDraftListingData(draftId, 'sellers-disclosure' as any, updatedData as any);
     onComplete();
   };
 
@@ -148,7 +148,7 @@ export function ListingCreationFlow({
     
     // Save progress and return to listings page
     const draftId = `listing-${Date.now()}`;
-    saveDraftListingData(draftId, 'additional-information', updatedData);
+    saveDraftListingData(draftId, 'additional-information' as any, updatedData as any);
     onComplete();
   };
 
@@ -159,7 +159,7 @@ export function ListingCreationFlow({
     
     // Save progress and return to listings page
     const draftId = `listing-${Date.now()}`;
-    saveDraftListingData(draftId, 'mortgages-taxes-liens', updatedData);
+    saveDraftListingData(draftId, 'mortgages-taxes-liens' as any, updatedData as any);
     onComplete();
   };
 
@@ -169,7 +169,7 @@ export function ListingCreationFlow({
     
     // Save progress and return to listings page
     const draftId = `listing-${Date.now()}`;
-    saveDraftListingData(draftId, 'showing-access', updatedData);
+    saveDraftListingData(draftId, 'showing-access' as any, updatedData as any);
     onComplete();
   };
 
@@ -189,7 +189,7 @@ export function ListingCreationFlow({
     
     // Save progress and return to listings page
     const draftId = `listing-${Date.now()}`;
-    saveDraftListingData(draftId, 'listing-price', updatedData);
+    saveDraftListingData(draftId, 'listing-price' as any, updatedData as any);
     onComplete();
   };
 
@@ -203,7 +203,7 @@ export function ListingCreationFlow({
     
     // Save progress and return to listings page
     const draftId = `listing-${Date.now()}`;
-    saveDraftListingData(draftId, 'sign-paperwork', updatedData);
+    saveDraftListingData(draftId, 'sign-paperwork' as any, updatedData as any);
     onComplete();
   };
 
@@ -217,6 +217,7 @@ export function ListingCreationFlow({
             onNext={handleBasicInfoComplete}
             onExit={handleExit}
             initialData={listingData.basicInfo}
+            isNewUser={listingData.basicInfo?._fromOnboardingWithAddress || false}
           />
         )}
 

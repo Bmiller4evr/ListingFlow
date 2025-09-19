@@ -9,8 +9,16 @@ interface SignInModalProps {
 }
 
 export function SignInModal({ open, onOpenChange, onSignIn }: SignInModalProps) {
-  const handleAuthSuccess = () => {
-    onSignIn('user@example.com'); // This will be replaced by real user data
+  const handleAuthSuccess = (userData?: any) => {
+    // If userData is provided, it means this was a signup (account creation)
+    if (userData) {
+      console.log('New account created via SignInModal - userData:', userData);
+      // For new account creation, we'll let the auth state monitor handle the redirect
+      onSignIn(userData.email || 'user@example.com');
+    } else {
+      // Regular sign in
+      onSignIn('user@example.com'); // This will be replaced by real user data
+    }
     onOpenChange(false);
   };
 

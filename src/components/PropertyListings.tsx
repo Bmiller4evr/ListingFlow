@@ -70,6 +70,11 @@ export function PropertyListings({
   const handleStartListingFlow = () => {
     if (onStartListingFlow) {
       onStartListingFlow();
+    } else {
+      // Fallback: use localStorage to trigger listing creation
+      console.log('Starting listing flow via localStorage');
+      localStorage.setItem('startListingFlow', 'true');
+      window.location.reload();
     }
   };
 
@@ -98,11 +103,10 @@ export function PropertyListings({
 
 
   return (
-    <Card>
-      <Tabs defaultValue="all" value={activeTab} onValueChange={setActiveTab} className="w-full">
+    <Tabs defaultValue="all" value={activeTab} onValueChange={setActiveTab} className="w-full">
         {/* Mobile Layout: Stack vertically */}
         {isMobile ? (
-          <div className="space-y-3 px-4 pt-4">
+          <div className="space-y-3 px-4">
             <Button 
               onClick={handleStartListingFlow}
               className="flex items-center gap-1 w-full h-12 bg-brand-primary hover:bg-primary-hover text-white border-0"
@@ -119,7 +123,7 @@ export function PropertyListings({
           </div>
         ) : (
           /* Desktop Layout: Horizontal */
-          <div className="flex items-center justify-between px-4 pt-4">
+          <div className="flex items-center justify-between px-4">
             <TabsList>
               <TabsTrigger value="all">All</TabsTrigger>
               <TabsTrigger value="active">Active</TabsTrigger>
@@ -161,17 +165,18 @@ export function PropertyListings({
                       {listings.length === 0 ? (
                         <tr>
                           <td colSpan={5} className="p-0">
-                            <div className="flex flex-col items-center justify-center py-12 px-4">
-                              <div className="text-2xl mb-2">🏠</div>
-                              <h3 className="text-lg font-semibold mb-2">No listings yet</h3>
-                              <p className="text-muted-foreground text-center mb-6">
+                            <div className="flex flex-col items-center justify-center py-16">
+                              <div className="text-4xl mb-3">🏠</div>
+                              <h3 className="text-xl font-semibold mb-3">No listings yet</h3>
+                              <p className="text-muted-foreground text-center mb-8 max-w-md">
                                 Ready to list your property? Get started with just a few simple steps.
                               </p>
-                              <Button 
+                              <Button
                                 onClick={handleStartListingFlow}
-                                className="flex items-center gap-1 bg-brand-primary hover:bg-primary-hover text-white border-0"
+                                className="flex items-center gap-2 bg-primary hover:bg-primary-hover text-white px-6 py-2"
+                                size="lg"
                               >
-                                <Plus className="h-4 w-4" /> List Your First Home
+                                <Plus className="h-5 w-5" /> List Your First Home
                               </Button>
                             </div>
                           </td>
@@ -288,7 +293,7 @@ export function PropertyListings({
                         </p>
                         <Button 
                           onClick={handleStartListingFlow}
-                          className="flex items-center gap-1 bg-brand-primary hover:bg-primary-hover text-white border-0 w-full"
+                          className="flex items-center gap-2 bg-primary hover:bg-primary-hover text-white w-full"
                         >
                           <Plus className="h-4 w-4" /> List Your First Home
                         </Button>
@@ -400,6 +405,5 @@ export function PropertyListings({
           </CardContent>
         </TabsContent>
       </Tabs>
-    </Card>
   );
 }

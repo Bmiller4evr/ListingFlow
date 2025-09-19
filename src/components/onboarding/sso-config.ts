@@ -1,7 +1,8 @@
 export const SSO_PROVIDERS = {
   google: {
     name: 'Google',
-    icon: 'Chrome',
+    icon: 'Google', // Will use SVG icon
+    color: '#4285F4',
     mockData: {
       firstName: 'John',
       lastName: 'Smith',
@@ -11,7 +12,8 @@ export const SSO_PROVIDERS = {
   },
   apple: {
     name: 'Apple',
-    icon: '🍎',
+    icon: 'Apple', // Will use SVG icon
+    color: '#000000',
     mockData: {
       firstName: 'Jane',
       lastName: 'Doe',
@@ -21,7 +23,8 @@ export const SSO_PROVIDERS = {
   },
   facebook: {
     name: 'Facebook',
-    icon: '📘',
+    icon: 'Facebook', // Will use SVG icon
+    color: '#1877F2',
     mockData: {
       firstName: 'Mike',
       lastName: 'Johnson',

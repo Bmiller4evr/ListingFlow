@@ -48,7 +48,7 @@ interface Question {
   id: string;
   title: string;
   description?: string;
-  type: 'address' | 'select' | 'radio' | 'input';
+  type: 'individual-address' | 'address' | 'select' | 'radio' | 'input';
   options?: { value: string; label: string; description?: string }[];
   placeholder?: string;
   inputType?: string;
@@ -60,9 +60,10 @@ interface BasicInformationFormProps {
   onBack?: () => void;
   onExit?: () => void;
   initialData?: Partial<BasicInformationData>;
+  isNewUser?: boolean; // True if user is coming from onboarding flow
 }
 
-export function BasicInformationForm({ onNext, onBack, onExit, initialData }: BasicInformationFormProps) {
+export function BasicInformationForm({ onNext, onBack, onExit, initialData, isNewUser = false }: BasicInformationFormProps) {
   const isMobile = useIsMobile();
   const [showExitDialog, setShowExitDialog] = useState(false);
   
@@ -107,6 +108,13 @@ export function BasicInformationForm({ onNext, onBack, onExit, initialData }: Ba
 
   // Define all questions in order
   const allQuestions: Question[] = [
+    {
+      id: 'individual-address',
+      title: 'Confirm Your Property Address',
+      description: 'Please verify and complete the address details for your property',
+      type: 'individual-address',
+      required: true
+    },
     {
       id: 'address',
       title: 'What is the Address of the Property?',
@@ -319,21 +327,31 @@ export function BasicInformationForm({ onNext, onBack, onExit, initialData }: Ba
     const propertyType = formData.propertySpecs.propertyType;
     const coveredParking = formData.propertySpecs.coveredParking;
     const occupancyStatus = formData.occupancyStatus;
-    
+
     let filteredQuestions = allQuestions;
+
+    // Filter address question types based on user type
+    if (isNewUser) {
+      // New users (from onboarding) see individual address fields, skip autocomplete
+      filteredQuestions = filteredQuestions.filter(q => q.id !== 'address');
+    } else {
+      // Existing users see autocomplete, skip individual fields
+      filteredQuestions = filteredQuestions.filter(q => q.id !== 'individual-address');
+    }
     
     if (propertyType === 'land') {
-      // For land: address, property type, lot size, survey, occupancy
-      filteredQuestions = allQuestions.filter(q => 
-        q.id === 'address' || 
-        q.id === 'propertyType' || 
-        q.id === 'lotSize' || 
-        q.id === 'survey' || 
+      // For land: address (individual or autocomplete), property type, lot size, survey, occupancy
+      filteredQuestions = filteredQuestions.filter(q =>
+        q.id === 'individual-address' ||
+        q.id === 'address' ||
+        q.id === 'propertyType' ||
+        q.id === 'lotSize' ||
+        q.id === 'survey' ||
         q.id === 'occupancy'
       );
     } else if (propertyType === 'condo' || propertyType === 'townhome') {
       // For condo/townhome: all except lot size
-      filteredQuestions = allQuestions.filter(q => q.id !== 'lotSize');
+      filteredQuestions = filteredQuestions.filter(q => q.id !== 'lotSize');
     }
     
     // Filter out covered parking related questions based on selection
@@ -360,7 +378,7 @@ export function BasicInformationForm({ onNext, onBack, onExit, initialData }: Ba
     }
     
     return filteredQuestions;
-  }, [formData.propertySpecs.propertyType, formData.propertySpecs.coveredParking, formData.propertySpecs.squareFootageSource, formData.occupancyStatus]);
+  }, [formData.propertySpecs.propertyType, formData.propertySpecs.coveredParking, formData.propertySpecs.squareFootageSource, formData.occupancyStatus, isNewUser]);
 
   // Reset question index when property type changes and filters questions
   useEffect(() => {
@@ -650,7 +668,7 @@ export function BasicInformationForm({ onNext, onBack, onExit, initialData }: Ba
   };
 
   const getCurrentValue = () => {
-    if (currentQuestion.id === 'address') {
+    if (currentQuestion.id === 'address' || currentQuestion.id === 'individual-address') {
       return formData.address;
     } else if (currentQuestion.id === 'survey') {
       return formData.hasExistingSurvey === null ? '' : formData.hasExistingSurvey ? 'yes' : 'no';
@@ -667,6 +685,83 @@ export function BasicInformationForm({ onNext, onBack, onExit, initialData }: Ba
     const currentValue = getCurrentValue();
 
     switch (currentQuestion.type) {
+      case 'individual-address':
+        return (
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="street">Street Address</Label>
+              <Input
+                id="street"
+                type="text"
+                placeholder="123 Main Street"
+                value={formData.address.street}
+                onChange={(e) => updateFormData('address', {
+                  ...formData.address,
+                  street: e.target.value
+                })}
+                className="w-full"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="city">City</Label>
+                <Input
+                  id="city"
+                  type="text"
+                  placeholder="Dallas"
+                  value={formData.address.city}
+                  onChange={(e) => updateFormData('address', {
+                    ...formData.address,
+                    city: e.target.value
+                  })}
+                  className="w-full"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="state">State</Label>
+                <Select
+                  value={formData.address.state}
+                  onValueChange={(value) => updateFormData('address', {
+                    ...formData.address,
+                    state: value
+                  })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="TX">
+                      {formData.address.state || "TX"}
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="TX">Texas</SelectItem>
+                    <SelectItem value="OK">Oklahoma</SelectItem>
+                    <SelectItem value="AR">Arkansas</SelectItem>
+                    <SelectItem value="LA">Louisiana</SelectItem>
+                    <SelectItem value="NM">New Mexico</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div>
+              <Label htmlFor="zipCode">ZIP Code</Label>
+              <Input
+                id="zipCode"
+                type="text"
+                placeholder="75201"
+                value={formData.address.zipCode}
+                onChange={(e) => updateFormData('address', {
+                  ...formData.address,
+                  zipCode: e.target.value
+                })}
+                className="w-full"
+                maxLength={5}
+              />
+            </div>
+          </div>
+        );
+
       case 'address':
         return (
           <AddressInput

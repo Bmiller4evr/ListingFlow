@@ -4,7 +4,6 @@ import { Check, ChevronRight, Home, MapPin, Building, LogIn } from "lucide-react
 import { Card, CardContent } from "./ui/card";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { AddressInput } from "./AddressInput";
-import { TrustpilotReviews } from "./TrustpilotReviews";
 
 
 interface LandingPageProps {
@@ -15,16 +14,28 @@ interface LandingPageProps {
 export function LandingPage({ onStartFlow, onSignIn }: LandingPageProps) {
   // Handle when an address is selected from the input
   const handleAddressSelected = (address: string, placeDetails?: any) => {
+    // Parse the address to extract components (basic parsing for now)
+    const parts = address.split(',').map(p => p.trim());
+    const street = parts[0] || address;
+    const city = parts[1] || '';
+    const stateZip = parts[2] || '';
+    const [state, zip] = stateZip.split(' ').filter(Boolean);
+
     // Create a simplified address object
     const addressData = {
-      street: address,
+      street: street,
+      city: city,
+      state: state || 'TX',
+      zip: zip || '',
       formatted_address: address,
       placeDetails: placeDetails
     };
-    
+
+    console.log('Storing address in localStorage:', addressData);
+
     // Store the address in localStorage
     localStorage.setItem('verifiedAddress', JSON.stringify(addressData));
-    
+
     // Start the listing flow with the address
     onStartFlow();
   };
@@ -151,8 +162,6 @@ export function LandingPage({ onStartFlow, onSignIn }: LandingPageProps) {
           </div>
         </section>
         
-        {/* Trustpilot Reviews */}
-        <TrustpilotReviews />
 
         {/* How It Works */}
         <section className="py-12 md:py-24 lg:py-32 bg-muted/30">

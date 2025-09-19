@@ -1,5 +1,5 @@
 import { Button } from "../ui/button";
-import { Chrome } from "lucide-react";
+import { Chrome, Apple, Circle } from "lucide-react";
 import { SSO_PROVIDERS, SSOProvider } from "./sso-config";
 
 interface SSOButtonsProps {
@@ -41,7 +41,7 @@ export function SSOButtons({ onSSOSignup, ssoLoading }: SSOButtonsProps) {
             <div className="animate-spin rounded-full h-4 w-4 border-2 border-primary border-t-transparent" />
           ) : (
             <>
-              <span className="mr-2">{SSO_PROVIDERS.apple.icon}</span>
+              <Apple className="h-4 w-4 mr-2" />
               {SSO_PROVIDERS.apple.name}
             </>
           )}
@@ -57,7 +57,7 @@ export function SSOButtons({ onSSOSignup, ssoLoading }: SSOButtonsProps) {
             <div className="animate-spin rounded-full h-4 w-4 border-2 border-primary border-t-transparent" />
           ) : (
             <>
-              <span className="mr-2">{SSO_PROVIDERS.facebook.icon}</span>
+              <Circle className="h-4 w-4 mr-2 text-blue-600" />
               {SSO_PROVIDERS.facebook.name}
             </>
           )}

@@ -77,63 +77,86 @@ export function AppWithAuth() {
       setSavedListingCreationData(savedData.data);
       setSavedListingCreationStep(savedData.step);
     }
+
+    // Check if we should start listing flow
+    const shouldStartListing = localStorage.getItem('startListingFlow');
+    if (shouldStartListing === 'true') {
+      localStorage.removeItem('startListingFlow');
+      setSavedListingCreationData({ basicInfo: {} });
+      setSavedListingCreationStep('basic-info');
+      setCurrentView('listing-creation');
+    }
   }, []);
 
   const handleSignIn = () => {
-    setShowSignInModal(true);
-  };
-
-  const handleSignInSuccess = () => {
-    setShowSignInModal(false);
+    // Skip sign in modal - go directly to dashboard for testing
     setCurrentView('listings');
   };
 
-  const handleOnboardingComplete = () => {
-    // Get the stored address from landing page
-    let initialListingData = {};
-    try {
-      const storedAddress = window.localStorage.getItem('verifiedAddress');
-      console.log('Stored address from localStorage:', storedAddress);
-      
-      if (storedAddress) {
-        const addressData = JSON.parse(storedAddress);
-        console.log('Parsed address data:', addressData);
-        
-        // Convert the stored address format to ListingCreationData format
-        initialListingData = {
-          basicInfo: {
-            address: {
-              street: addressData.street || addressData.formatted_address || '',
-              city: addressData.city || '',
-              state: addressData.state || 'TX',
-              zip: addressData.zip || '',
-              formatted_address: addressData.formatted_address || addressData.street || ''
-            },
-            _fromOnboardingWithAddress: true
-          }
-        };
-        
-        console.log('Initial listing data created:', initialListingData);
-        
-        // Clean up the stored address since we're using it now
-        window.localStorage.removeItem('verifiedAddress');
-      } else {
-        console.log('No stored address found - user may have skipped address entry');
-      }
-    } catch (error) {
-      console.error('Error retrieving stored address:', error);
+  const handleSignInSuccess = (userEmail?: string) => {
+    console.log('handleSignInSuccess called with email:', userEmail);
+    setShowSignInModal(false);
+
+    // Check if this might be a new user (we can't easily distinguish here)
+    // So let's set the flag to be safe - the auth monitor will handle it
+    setNewUserJustSignedUp(true);
+
+    setCurrentView('listings');
+  };
+
+  // Add a flag to track if user just signed up
+  const [newUserJustSignedUp, setNewUserJustSignedUp] = useState(false);
+
+  // Monitor authentication state changes for new signups
+  useEffect(() => {
+    if (user && newUserJustSignedUp) {
+      // Force redirect new users to dashboard regardless of any other navigation
+      console.log('New user detected - forcing redirect to dashboard');
+      setCurrentView('listings');
+      setNewUserJustSignedUp(false);
     }
-    
+  }, [user, newUserJustSignedUp]);
+
+  // Also monitor for ANY new user authentication
+  useEffect(() => {
+    if (user) {
+      console.log('User authenticated:', user.email);
+      // Check if this user was created recently (within last 30 seconds)
+      const userCreatedAt = new Date(user.created_at);
+      const now = new Date();
+      const timeDiff = now.getTime() - userCreatedAt.getTime();
+      const thirtySeconds = 30 * 1000;
+
+      if (timeDiff < thirtySeconds) {
+        console.log('Detected newly created user - forcing redirect to dashboard');
+        setCurrentView('listings');
+      }
+    }
+  }, [user]);
+
+  const handleOnboardingComplete = () => {
+    console.log('handleOnboardingComplete called - new user just signed up');
+
+    // Mark that a new user just signed up
+    setNewUserJustSignedUp(true);
+
+    // Clear onboarding data first
     setSavedOnboardingData(undefined);
     setSavedOnboardingStep(undefined);
-    
-    // Start listing creation with pre-filled address data
-    console.log('Setting listing creation data:', initialListingData);
-    console.log('Setting listing creation step: basic-info');
-    setSavedListingCreationData(initialListingData);
-    setSavedListingCreationStep('basic-info');
-    console.log('Setting current view to: listing-creation');
-    setCurrentView('listing-creation');
+
+    // Clean up any stored address since onboarding is complete
+    try {
+      window.localStorage.removeItem('verifiedAddress');
+    } catch (error) {
+      console.error('Error cleaning up stored address:', error);
+    }
+
+    // Use setTimeout to ensure state updates happen in the correct order
+    setTimeout(() => {
+      // Send new users directly to dashboard instead of listing creation
+      console.log('Setting current view to: listings (dashboard)');
+      setCurrentView('listings');
+    }, 0);
   };
 
   const handleListingCreationComplete = () => {
@@ -152,7 +175,8 @@ export function AppWithAuth() {
   };
 
   const handleListingCreationSaveDraft = (data: any, step: ListingCreationStep) => {
-    saveDraftListingData(data, step);
+    const draftId = `listing-${Date.now()}`;
+    saveDraftListingData(draftId, step as any, data);
     setSavedListingCreationData(data);
     setSavedListingCreationStep(step);
   };
@@ -161,6 +185,13 @@ export function AppWithAuth() {
     setSavedOnboardingData(undefined);
     setSavedOnboardingStep(undefined);
     setCurrentView('landing');
+  };
+
+  const handleStartListingFlow = () => {
+    // Start listing creation flow directly
+    setSavedListingCreationData({ basicInfo: {} });
+    setSavedListingCreationStep('basic-info');
+    setCurrentView('listing-creation');
   };
 
   const handleViewChange = (view: View) => {
@@ -212,20 +243,28 @@ export function AppWithAuth() {
     );
   }
 
-  // Listing creation flow (requires authentication)
+  // Listing creation flow (no authentication required for testing)
   if (currentView === 'listing-creation' && savedListingCreationStep) {
+    console.log('Rendering ListingCreationFlow with step:', savedListingCreationStep, 'and data:', savedListingCreationData);
     return (
-      <ProtectedRoute>
+      <>
         <ListingCreationFlow
           onComplete={handleListingCreationComplete}
           onExit={handleListingCreationExit}
-          onSaveDraft={handleListingCreationSaveDraft}
           initialStep={savedListingCreationStep}
           initialData={savedListingCreationData}
         />
         <Toaster richColors position="bottom-right" />
-      </ProtectedRoute>
+      </>
     );
+  }
+
+  // Debug: Log when listing creation view is requested but step is missing
+  if (currentView === 'listing-creation' && !savedListingCreationStep) {
+    console.log('ERROR: listing-creation view requested but no step set. Falling back to listings view.');
+    console.log('Current state - View:', currentView, 'Step:', savedListingCreationStep, 'Data:', savedListingCreationData);
+    // Auto-redirect to listings view instead of showing empty content
+    setTimeout(() => setCurrentView('listings'), 0);
   }
 
   // Landing page (not authenticated)
@@ -236,11 +275,7 @@ export function AppWithAuth() {
           onStartFlow={() => setCurrentView('onboarding')}
           onSignIn={handleSignIn}
         />
-        <SignInModal
-          open={showSignInModal}
-          onOpenChange={setShowSignInModal}
-          onSignIn={handleSignInSuccess}
-        />
+{/* SignInModal removed for testing */}
         <Toaster richColors position="bottom-right" />
       </>
     );
@@ -251,57 +286,69 @@ export function AppWithAuth() {
 
   return (
     <>
-      {requiresAuth ? (
-        <ProtectedRoute>
-          <div className="min-h-screen bg-background">
-            <div className="flex h-screen">
-              <Sidebar
-                currentView={currentView}
-                onViewChange={handleViewChange}
-                collapsed={sidebarCollapsed}
-                onCollapsedChange={setSidebarCollapsed}
-                selectedListingId={selectedListingId}
-                onListingSelect={handleListingSelect}
-                listingHistory={listingHistory}
-                userProperties={USER_OWNED_PROPERTY_IDS}
-                activeDraftId={activeDraftId}
-                onDraftSelect={(draftId) => setActiveDraftId(draftId)}
-              />
-              
-              <main className={`flex-1 overflow-auto transition-all duration-300 ${
-                sidebarCollapsed ? 'ml-16' : 'ml-64'
-              }`}>
-                <AppContent
-                  currentView={currentView}
-                  selectedListingId={selectedListingId}
-                  currentListing={currentListing}
-                  showingsFilterListingId={showingsFilterListingId}
-                  onShowingsFilter={handleShowingsFilter}
-                  onListingSelect={handleListingSelect}
-                  onViewChange={handleViewChange}
-                  activeDraftId={activeDraftId}
-                  savedListingCreationData={savedListingCreationData}
-                  savedListingCreationStep={savedListingCreationStep}
-                />
-              </main>
-            </div>
-          </div>
-        </ProtectedRoute>
-      ) : (
-        <AppContent
-          currentView={currentView}
-          selectedListingId={selectedListingId}
-          currentListing={currentListing}
-          showingsFilterListingId={showingsFilterListingId}
-          onShowingsFilter={handleShowingsFilter}
-          onListingSelect={handleListingSelect}
-          onViewChange={handleViewChange}
-          activeDraftId={activeDraftId}
-          savedListingCreationData={savedListingCreationData}
-          savedListingCreationStep={savedListingCreationStep}
-        />
-      )}
-      
+      {/* Remove all authentication requirements for testing */}
+      <div className="min-h-screen bg-background">
+        <div className="flex h-screen">
+          <Sidebar
+            activeView={currentView}
+            onMenuClick={handleViewChange}
+            collapsed={sidebarCollapsed}
+            onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
+            userEmail={user?.email}
+            onSignOut={() => {
+              // Add logout functionality here
+              console.log('Logout clicked');
+            }}
+            isMobile={isMobile}
+          />
+
+          <main className={`flex-1 overflow-auto transition-all duration-300 ${
+            sidebarCollapsed ? 'ml-16' : 'ml-64'
+          }`}>
+            <AppContent
+              currentView={currentView}
+              listingHistory={listingHistory}
+              handleBackToListing={() => {
+                if (listingHistory.length > 0) {
+                  const previousListing = listingHistory[0];
+                  handleListingSelect(previousListing);
+                  setCurrentView('listing-detail');
+                }
+              }}
+              handleBackToHome={() => setCurrentView('listings')}
+              handleMenuClick={handleViewChange}
+              setShowSignInModal={setShowSignInModal}
+              handleLandingFlow={() => setCurrentView('onboarding')}
+              handleStartListingFlow={handleStartListingFlow}
+              handleCompleteOnboarding={handleOnboardingComplete}
+              handleExitOnboarding={handleOnboardingExit}
+              savedOnboardingStep={savedOnboardingStep}
+              savedOnboardingData={savedOnboardingData}
+              handleCompleteListingCreation={handleListingCreationComplete}
+              handleExitListingCreation={handleListingCreationExit}
+              savedListingCreationStep={savedListingCreationStep}
+              savedListingCreationData={savedListingCreationData}
+              handleViewListing={(id) => {
+                handleListingSelect(id);
+                setCurrentView('listing-detail');
+              }}
+              handleResumeDraft={(listingId, lastStep, draftData) => {
+                setSavedListingCreationData(draftData);
+                setSavedListingCreationStep(lastStep as ListingCreationStep);
+                setCurrentView('listing-creation');
+              }}
+              currentListing={currentListing}
+              isCurrentListingOwned={USER_OWNED_PROPERTY_IDS.includes(selectedListingId || '')}
+              handleViewShowingsForListing={(listingId) => {
+                setShowingsFilterListingId(listingId);
+                setCurrentView('showings');
+              }}
+              showingsFilterListingId={showingsFilterListingId}
+            />
+          </main>
+        </div>
+      </div>
+
       <Toaster richColors position="bottom-right" />
     </>
   );

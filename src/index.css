@@ -38,12 +38,15 @@
   --foreground: #1F2937;
   --card: #F8FAFC;
   --card-foreground: #374151;
+  --popover: #ffffff;
+  --popover-foreground: #1F2937;
   --muted: #F9FAFB;
   --muted-foreground: #6B7280;
   --accent: #EFF6FF;
   --accent-foreground: #1E40AF;
   --border: #E5E7EB;
   --input: transparent;
+  --input-background: #ffffff;
   --ring: #93C5FD;
   
   /* Your preferred rounded corners from Figma */

@@ -49,20 +49,27 @@ export function AddressInput({
     setIsLoadingSuggestions(true);
     setHasError(false);
 
+    const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+    if (!apiKey) {
+      console.error('Google Maps API key is not configured');
+      throw new Error('API key missing');
+    }
+
     try {
       const response = await fetch('https://places.googleapis.com/v1/places:autocomplete', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-Goog-Api-Key': import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '',
+          'X-Goog-Api-Key': apiKey,
         },
         body: JSON.stringify({
           input: input,
-          includedPrimaryTypes: ['street_address', 'premise', 'subpremise'],
+          // Temporarily remove type restrictions to get more results
+          // includedPrimaryTypes: ['street_address', 'premise', 'subpremise'],
           locationBias: {
             circle: {
-              center: { latitude: 32.7767, longitude: -96.7970 }, // Dallas, TX
-              radius: 50000 // 50km radius
+              center: { latitude: 32.8968, longitude: -97.0380 }, // DFW Airport
+              radius: 50000 // 50km radius (max allowed by Google Places API)
             }
           },
           languageCode: 'en',
@@ -71,21 +78,19 @@ export function AddressInput({
       });
 
       if (!response.ok) {
-        throw new Error('Failed to fetch suggestions');
+        const errorText = await response.text();
+        console.error('Google Places API error:', response.status, errorText);
+        throw new Error(`Failed to fetch suggestions: ${response.status}`);
       }
 
       const data: AutocompleteResponse = await response.json();
+      console.log('Google Places API response:', data);
       
-      // Filter for residential addresses
-      const residentialSuggestions = data.suggestions?.filter(suggestion => {
-        const types = suggestion.placePrediction.types || [];
-        return types.some(type => 
-          ['street_address', 'premise', 'subpremise'].includes(type)
-        );
-      }) || [];
+      // Show all suggestions (Google API will already filter based on input)
+      const allSuggestions = data.suggestions || [];
 
-      setSuggestions(residentialSuggestions);
-      setShowSuggestions(residentialSuggestions.length > 0);
+      setSuggestions(allSuggestions);
+      setShowSuggestions(allSuggestions.length > 0);
       setSelectedSuggestionIndex(-1);
     } catch (error) {
       console.error('Error fetching suggestions:', error);
@@ -222,7 +227,7 @@ export function AddressInput({
       {showSuggestions && suggestions.length > 0 && (
         <div
           ref={suggestionsRef}
-          className="absolute top-full left-0 right-0 mt-1 bg-background border border-border rounded-lg shadow-lg z-50 max-h-60 overflow-y-auto"
+          className="absolute top-full left-0 right-0 mt-1 bg-white border border-border rounded-lg shadow-lg z-50 max-h-60 overflow-y-auto"
         >
           {suggestions.map((suggestion, index) => (
             <button
@@ -243,7 +248,7 @@ export function AddressInput({
 
       {/* Error state */}
       {hasError && (
-        <div className="absolute top-full left-0 right-0 mt-1 p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
+        <div className="absolute top-full left-0 right-0 mt-1 p-3 bg-red-50 border border-red-200 rounded-lg">
           <p className="text-sm text-destructive">
             Unable to load address suggestions. Please type your full address.
           </p>

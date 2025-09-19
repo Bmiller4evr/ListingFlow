@@ -158,21 +158,29 @@ export function AppContent({
         />
       )}
 
-      {currentView === 'listing-creation' && (
-        <ListingCreationFlow 
+      {currentView === 'listing-creation' && savedListingCreationStep && (
+        <ListingCreationFlow
           onComplete={handleCompleteListingCreation}
           onExit={handleExitListingCreation}
           initialStep={savedListingCreationStep}
           initialData={savedListingCreationData}
           userAccount={savedOnboardingData?.account}
-          existingAddress={savedOnboardingData?.address}
         />
+      )}
+
+      {currentView === 'listing-creation' && !savedListingCreationStep && (
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-center space-y-4">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto" />
+            <p className="text-muted-foreground">Setting up your listing creation...</p>
+          </div>
+        </div>
       )}
       
       {currentView === 'listings' && (
         <>
           <DashboardHeader currentView={currentView} />
-          <PropertyListings 
+          <PropertyListings
             onViewListing={handleViewListing}
             onStartListingFlow={handleStartListingFlow}
             onResumeDraft={handleResumeDraft}

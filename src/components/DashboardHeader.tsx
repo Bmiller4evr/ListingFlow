@@ -12,7 +12,7 @@ export function DashboardHeader({ currentView = 'listings' }: DashboardHeaderPro
       case 'listings':
         return {
           title: 'My Listings',
-          subtitle: `Welcome back, ${userName}`
+          subtitle: ''
         };
       case 'showings':
         return {
@@ -57,7 +57,7 @@ export function DashboardHeader({ currentView = 'listings' }: DashboardHeaderPro
       default:
         return {
           title: 'Dashboard',
-          subtitle: `Welcome back, ${userName}`
+          subtitle: ''
         };
     }
   };
@@ -65,10 +65,10 @@ export function DashboardHeader({ currentView = 'listings' }: DashboardHeaderPro
   const { title, subtitle } = getHeaderContent();
   
   return (
-    <header className="pb-6">
+    <header className="p-6 pb-4">
       <div className="space-y-1">
-        <h1 className="text-text-primary">{title}</h1>
-        <p className="text-text-muted">{subtitle}</p>
+        <h1 className="text-2xl font-semibold">{title}</h1>
+        {subtitle && <p className="text-muted-foreground">{subtitle}</p>}
       </div>
     </header>
   );
